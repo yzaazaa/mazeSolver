@@ -47,6 +47,7 @@ class QueueFrontier(AFrontier):
 # Maze Class which will have all necessary information of the maze
 
 class Maze():
+	# Parse file
 	def __init__(self, filename):
 		with open(filename) as f:
 			content = f.read()
@@ -100,7 +101,16 @@ class Maze():
 					s += " "
 			s += "\n"
 		return s
+	
+	# Print all actions needed to solve maze
+	def print_actions(self):
+		solution = self.solution[0]
+		for i in range(len(solution) - 1):
+			if solution[i] != solution[i + 1]:
+				print(solution[i])
+		print(solution[-1])
 
+	# Returns all possible states from a specific state
 	def neighbors(self, state):
 		row, col = state
 		candidates = [
@@ -117,6 +127,7 @@ class Maze():
 		return res
 
 	def solve(self, search_algo):
+		# Set initial state
 		initial_node = Node(state=self.start, parent=None, action=None)
 		
 		if search_algo == "DFS":
@@ -124,19 +135,22 @@ class Maze():
 		elif search_algo == "BFS":
 			frontierObj = QueueFrontier
 		else:
-			raise Exception("Enter DFS or BFS!")
+			raise Exception("Choose a valid search algoritm (DFS / BFS)")
 		frontier = frontierObj()
 		frontier.push(initial_node)
 
+		# Set explored set and number of explored nodes
 		self.explored = set()
 		self.nb_explored = 0
 
 		while True:
+			# Check if frontier empty then no solution
 			if frontier.empty():
 				raise Exception("No solution!")
-			
+			# Pop node from the frontier to consider
 			node = frontier.pop()
 			self.nb_explored += 1
+			# If node is goal node return solution
 			if node.state == self.goal:
 				actions = []
 				cells = []
@@ -148,13 +162,13 @@ class Maze():
 				cells.reverse()
 				self.solution = (actions, cells)
 				return
-
+			# Add state to explored sets
 			self.explored.add(node.state)
-
+			# Expand node if not in frontier and not already explored
 			for action, state in self.neighbors(node.state):
 				if not frontier.contains_state(state) and state not in self.explored:
 					frontier.push(Node(state=state, parent=node, action=action))
-
+	# Output result image using pillow
 	def output_image(self, filename, show_solution=True, show_explored=False):
 		from PIL import Image, ImageDraw
 		cell_size = 50
@@ -189,14 +203,18 @@ class Maze():
 				)
 		img.save(filename)
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 2 and len(sys.argv) != 3:
 	sys.exit("Usage: python maze.py maze.txt (DFS / BFS)")
 
 maze = Maze(sys.argv[1])
 print("Maze: \n", maze)
 print("Solving maze ...")
-maze.solve(sys.argv[2])
+try:
+	maze.solve(sys.argv[2])
+except IndexError:
+	maze.solve("BFS")
 print("States Explored: ", maze.nb_explored)
 print("Solution:")
 print(maze)
+maze.print_actions()
 maze.output_image("maze.png", show_explored=True)
