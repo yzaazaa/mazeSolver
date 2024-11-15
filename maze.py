@@ -216,5 +216,6 @@ except IndexError:
 print("States Explored: ", maze.nb_explored)
 print("Solution:")
 print(maze)
+print("Actions: ")
 maze.print_actions()
 maze.output_image("maze.png", show_explored=True)
