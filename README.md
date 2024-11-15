@@ -91,6 +91,10 @@ right
 down
 ```
 
+![Maze Visualization](assets/maze.png)
+![Maze Visualization](assets/maze2.png)
+![Maze Visualization](assets/maze3.png)
+
 ## Future Improvements
 - Implement other pathfinding algorithms (e.g., A*, Dijkstra's)
 
