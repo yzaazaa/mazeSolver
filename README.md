@@ -21,9 +21,9 @@ source venv/bin/activate # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
 ```
 4. Run the script:
-   ```
-   python maze.py <maze_file_name> <"DFS" or "BFS (optional)>
-   ```
+```
+python maze.py <maze_file_name> <"DFS" or "BFS (optional)>
+```
 
 ## Algorithms
 The script implements two algorithms to solve the maze:
