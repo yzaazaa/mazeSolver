@@ -4,12 +4,13 @@ from abc import ABC, abstractmethod
 # Node Class to hold state parent and possible actions
 
 class Node():
-	def __init__(self, state, parent, action):
+	def __init__(self, state, parent, action, cost):
 		self.state = state
 		self.parent = parent
 		self.action = action
+		self.cost = cost
 
-# AFrontier is a abstract base class for StackFrontier and QueueFrontier classes
+# AFrontier is an abstract base class for Frontier classes for uninformed search
 
 class AFrontier(ABC):
 	def __init__(self):
@@ -24,9 +25,10 @@ class AFrontier(ABC):
 	def pop(self):
 		pass
 
-# StackFrontier Class which will be used for depth-first-search	
+# StackFrontier Class which will be used for depth-first search	
 
 class StackFrontier(AFrontier):
+	# Pop the last pushed node to the frontier
 	def pop(self):
 		if len(self.frontier) == 0:
 			raise Exception("Empty frontier")
@@ -34,15 +36,65 @@ class StackFrontier(AFrontier):
 		del self.frontier[-1]
 		return node
 
-# QueueFrontier Class which will be used for breath-first-search	
+# QueueFrontier Class which will be used for breath-first search	
 
 class QueueFrontier(AFrontier):
+	# Pop the first pushed node to the frontier
 	def pop(self):
 		if len(self.frontier) == 0:
 			raise Exception("Empty frontier")
 		node = self.frontier[0]
 		del self.frontier[0]
 		return node
+
+# AFrontierInformedSearch is an abstract class for Frontiers for Informed Search
+
+class AFrontierInformedSearch(AFrontier):
+	def __init__(self, goal):
+		super().__init__()
+		self.goal = goal
+
+	@abstractmethod
+	def findNodeToPop(self):
+		pass
+	
+	def pop(self):
+		node = self.findNodeToPop()
+		self.frontier.remove(node)
+		return node
+
+def manhattan_distance(node, goal):
+	return abs(node.state[0] - goal[0]) + abs(node.state[1] - goal[1])
+
+# GreedyFrontier class which will be used for greedy breadth-first search
+
+class GreedyFrontier(AFrontierInformedSearch):
+	# Find the node to pop using a heuristic function, for the mazeSolver we use manhattan distance
+	def findNodeToPop(self):
+		min_node = self.frontier[0]
+		min_distance = manhattan_distance(min_node, self.goal)
+		for node in self.frontier[1:]:
+			curr_node_distance = manhattan_distance(node, self.goal)
+			if curr_node_distance < min_distance:
+				min_node = node
+				min_distance = curr_node_distance
+		return min_node
+
+# AStarFrontier class which will be used for A* algorithm
+
+class AStarFrontier(AFrontierInformedSearch):
+	
+	# Find the node to pop using a heuristic function and path cost
+	# For the mazeSolver we use manhattan distance and the steps needed to go from A to the specific node
+	def findNodeToPop(self):
+		min_node = self.frontier[0]
+		min_val = manhattan_distance(min_node, self.goal) + min_node.cost
+		for node in self.frontier[1:]:
+			curr_node_val = manhattan_distance(node, self.goal) + node.cost
+			if curr_node_val < min_val:
+				min_node = node
+				min_val = curr_node_val
+		return min_node
 
 # Maze Class which will have all necessary information of the maze
 
@@ -128,15 +180,22 @@ class Maze():
 
 	def solve(self, search_algo):
 		# Set initial state
-		initial_node = Node(state=self.start, parent=None, action=None)
+		initial_node = Node(state=self.start, parent=None, action=None, cost=0)
 		
 		if search_algo == "DFS":
 			frontierObj = StackFrontier
 		elif search_algo == "BFS":
 			frontierObj = QueueFrontier
+		elif search_algo == "GBFS":
+			frontierObj = GreedyFrontier
+		elif search_algo == "A*":
+			frontierObj = AStarFrontier
 		else:
-			raise Exception("Choose a valid search algoritm (DFS / BFS)")
-		frontier = frontierObj()
+			raise Exception("Choose a valid search algoritm (DFS / BFS / GBFS / A*)")
+		if search_algo == "GBFS" or search_algo == "A*":
+			frontier = frontierObj(self.goal)
+		else:
+			frontier = frontierObj()
 		frontier.push(initial_node)
 
 		# Set explored set and number of explored nodes
@@ -149,6 +208,7 @@ class Maze():
 				raise Exception("No solution!")
 			# Pop node from the frontier to consider
 			node = frontier.pop()
+			last_node_cost = node.cost
 			self.nb_explored += 1
 			# If node is goal node return solution
 			if node.state == self.goal:
@@ -167,7 +227,8 @@ class Maze():
 			# Expand node if not in frontier and not already explored
 			for action, state in self.neighbors(node.state):
 				if not frontier.contains_state(state) and state not in self.explored:
-					frontier.push(Node(state=state, parent=node, action=action))
+					frontier.push(Node(state=state, parent=node, action=action, cost=node.cost+1))
+
 	# Output result image using pillow
 	def output_image(self, filename, show_solution=True, show_explored=False):
 		from PIL import Image, ImageDraw
@@ -203,16 +264,14 @@ class Maze():
 				)
 		img.save(filename)
 
-if len(sys.argv) != 2 and len(sys.argv) != 3:
-	sys.exit("Usage: python maze.py maze.txt (DFS / BFS)")
+if len(sys.argv) != 2:
+	sys.exit("Usage: python maze.py maze.txt")
 
 maze = Maze(sys.argv[1])
 print("Maze: \n", maze)
+search_algorithm = input("\nInput the search algorithm you want to use:\nUninformed Search:\nDFS: Depth-first search\nBFS: Breath-first search\nInformed Search:\nGBFS: Greedy breath-first search\nA*: A star algorithm\n")
 print("Solving maze ...")
-try:
-	maze.solve(sys.argv[2])
-except IndexError:
-	maze.solve("BFS")
+maze.solve(search_algorithm)
 print("States Explored: ", maze.nb_explored)
 print("Solution:")
 print(maze)

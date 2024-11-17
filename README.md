@@ -38,6 +38,11 @@ The script implements two algorithms to solve the maze:
    - Can be implemented using a queue data structure.
    - Finds the shortest path.
 
+3. **Greedy Breadth-First Search (GBFS)**:
+   - A heuristic-based search algorithm that prioritizes nodes based on the estimated cost to the goal (using a heuristic function).
+   - Uses a priority queue (min-heap) to explore nodes.
+   - It doesn’t guarantee the shortest path, as it may not consider the overall cost, but it can be faster in many cases by focusing on promising paths.
+
 ## Example Output
 ```
 Maze: 
@@ -99,8 +104,10 @@ down
 
 ![Maze Visualization](assets/maze3.png)
 
-## Future Improvements
-- Implement other pathfinding algorithms (e.g., A*, Dijkstra's)
+![Maze Visualization](assets/GBFS_not_optimal.png)
+
+![Maze Visualization](assets/A*_optimal.png)
+
 
 ## Contributing
 If you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request.
