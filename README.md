@@ -43,6 +43,12 @@ The script implements two algorithms to solve the maze:
    - Uses a priority queue (min-heap) to explore nodes.
    - It doesn’t guarantee the shortest path, as it may not consider the overall cost, but it can be faster in many cases by focusing on promising paths.
 
+4. **A* algorithm (GBFS)**:
+   - An extension of Greedy BFS that combines the best of BFS and Greedy BFS.
+   - Uses a heuristic to estimate the cost to the goal (like Greedy BFS), but also accounts for the cost to reach the current node.
+   - The formula for the priority is 𝑓(𝑛) = 𝑔(𝑛) + ℎ(𝑛), where 𝑔(𝑛) is the cost to reach the current node, and ℎ(𝑛) is the heuristic estimated cost to the goal.
+   - A* guarantees finding the shortest path when an admissible and consistent heuristic is used.
+
 ## Example Output
 ```
 Maze: 
