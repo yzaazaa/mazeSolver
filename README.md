@@ -40,7 +40,6 @@ The script implements two algorithms to solve the maze:
 
 3. **Greedy Breadth-First Search (GBFS)**:
    - A heuristic-based search algorithm that prioritizes nodes based on the estimated cost to the goal (using a heuristic function).
-   - Uses a priority queue (min-heap) to explore nodes.
    - It doesn’t guarantee the shortest path, as it may not consider the overall cost, but it can be faster in many cases by focusing on promising paths.
 
 4. **A* algorithm (GBFS)**:
